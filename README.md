@@ -1,4 +1,4 @@
-# cw-paintjobs 🖨
+# cw-paintjobs 🎨
 Currently lacking:
 - Animations
 - Cost
@@ -6,7 +6,6 @@ Currently lacking:
 - probably alot more
 
 # Preview 📽
-[Video](https://youtu.be/CSYWQ2pf2a4)
 
 # Developed by Coffeelot and Wuggie
 [More scripts by us](https://github.com/stars/Coffeelot/lists/cw-scripts)  👈\
