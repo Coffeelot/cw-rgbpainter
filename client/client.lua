@@ -190,7 +190,6 @@ local function clearCustomColor(type, onlyLocal)
         clearCustomColor('2')
     end
     if not onlyLocal then
-        print('DATABASE THINGS')
         local plate = QBCore.Functions.GetPlate(vehicle)
         TriggerServerEvent('cw-rgbpainter:server:ClearCustomColor', type, plate)
         vehicleWorkedOn = nil
@@ -207,6 +206,39 @@ local function isInAPaintBooth(playerCoords)
             end
         end
         QBCore.Functions.Notify(Lang:t('error.distanceBooth'), "error")
+        return false
+    else
+        return true
+    end
+end
+
+local function hasAuth()
+    if Config.Settings.UseJobRequirements then
+        local Player = QBCore.Functions.GetPlayerData()
+        local playerHasJob = Config.AllowedJobs[Player.job.name]
+        local jobGradeReq = nil
+        if Config.Debug then
+           print('Player job: ', Player.job.name)
+           print('Allowed jobs: ', dump(Config.AllowedJobs))
+        end
+        
+        if playerHasJob then
+            if Config.Debug then
+               print('Player job level: ', Player.job.grade.level)
+            end
+            if Config.AllowedJobs[Player.job.name] ~= nil then
+                jobGradeReq = Config.AllowedJobs[Player.job.name].minimumRank
+                if Config.Debug then
+                   print('Required job grade: ', jobGradeReq)
+                end
+            end      
+            if jobGradeReq ~= nil then
+                if Player.job.grade.level >= jobGradeReq then
+                    return true
+                end
+            end
+        end
+        QBCore.Functions.Notify(Lang:t('error.notAuthorized'), "error")
         return false
     else
         return true
@@ -313,7 +345,7 @@ RegisterNetEvent("cw-rgbpainter:client:openClearInteraction", function()
     local ped = PlayerPedId()
     local playerCoords = GetEntityCoords(ped)
 
-    if isInAPaintBooth(playerCoords) and isWithinReach(playerCoords,vehicleCoords) then
+    if isInAPaintBooth(playerCoords) and isWithinReach(playerCoords,vehicleCoords) and hasAuth() then
         openClearMenu()
     end
 end)
@@ -462,7 +494,7 @@ RegisterNetEvent("cw-rgbpainter:client:openInteraction", function(canceled)
     local ped = PlayerPedId()
     local playerCoords = GetEntityCoords(ped)
 
-    if isInAPaintBooth(playerCoords) and isWithinReach(playerCoords, vehicleCoords) then
+    if isInAPaintBooth(playerCoords) and isWithinReach(playerCoords, vehicleCoords) and hasAuth() then
         openMainMenu()
     end
 end)

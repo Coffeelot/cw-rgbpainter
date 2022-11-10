@@ -20,6 +20,12 @@ Config.Locations = {
     vector3(103.97, 6622.73, 31.83) -- PALETO
 }
 
+Config.AllowedJobs = {
+    ['mechanic'] = { minimumRank = 4},
+    ['tuner'] = { minimumRank = 2},
+    ['spongebob'] = { minumumRank = 1 },
+}
+
 Config.Settings = {
     RemoveTime = 4000, -- Time it takes to use paint remover (in ms)
     PaintTime = 4000, -- Time it takes to paint a car (in ms)
@@ -28,4 +34,5 @@ Config.Settings = {
     CanistersAreUsedUp = true, -- Toggle if you want Paint canister to be used up as a consumeable on useage
     UseLocations = false, -- Toggle if you need to be in a paint booth or not. You can add more paint booths in Config.Locations. 
     MaximumLocationDistance = 20 , -- Maximum distance you can be from a paint booth in order to work on vehicles (can be toggled off with UseLocations above ^)
+    UseJobRequirements = false,
 }

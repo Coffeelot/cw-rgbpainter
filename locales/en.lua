@@ -33,6 +33,7 @@ local Translations = {
         ["amountCanisters"]                        = "You do not have enough paint canisters on you",
         ["amountRemoval"]                        = "You dont have enought paint removal canisters on you",
         ["inputAmount"]                        = "You need to input at least one color",
+        ["notAuthorized"]                        = "You lack the required job and/or rank to use this",
         
     },
     success = {
