@@ -4,6 +4,7 @@ local ogSec = nil
 local ogPrimCoat = nil
 local ogSecCoat = nil
 local ogPearl = nil
+local ogRims = nil
 local ogPrimaryIsRGB, ogSecondaryIsRGB = false, false
 local vehicleWorkedOn = nil
 local attachedProp = 0
@@ -90,13 +91,20 @@ local function handleSprayCanSpray(color)
     local particle = showNonLoopParticle('core', 'veh_respray_smoke', Size, r, g, b, attachedProp,0.0)
 end
 
-local function changeColors(r, g, b, type, coat)
+local function changeColors(r, g, b, type, coat, pearl, rims)
     if type == '1' then
         if Config.Debug then
            print('updating primary', r, g, b)
         end
         if coat ~= nil then
-            SetVehicleModColor_1(vehicleWorkedOn, tonumber(coat), 0, 0)
+            if not pearl then
+                pearl = 0
+            end
+            if not rims then
+                rims = 0
+            end
+            SetVehicleModColor_1(vehicleWorkedOn, tonumber(coat), 0, pearl)
+            SetVehicleExtraColours(vehicleWorkedOn, pearl, rims)
             SetVehicleCustomPrimaryColour(vehicleWorkedOn, tonumber(r),tonumber(g),tonumber(b))
         end
     end
@@ -105,7 +113,7 @@ local function changeColors(r, g, b, type, coat)
            print('updating secondary', r, g, b)
         end
         if coat ~= nil then
-            SetVehicleModColor_2(vehicleWorkedOn, tonumber(coat), 0, 0)
+            SetVehicleModColor_2(vehicleWorkedOn, tonumber(coat), 0)
             SetVehicleCustomSecondaryColour(vehicleWorkedOn, tonumber(r),tonumber(g),tonumber(b))
         end
     end
@@ -143,7 +151,8 @@ RegisterNetEvent('cw-rgbpainter:client:ChangeColor', function(r,g,b,type,coat, c
         local vehicle = GetPlayersLastVehicle()
         vehicleWorkedOn = vehicle
     end
-    changeColors(r,g,b,type,coat)
+    local pearlescentColor, rimsColor = GetVehicleExtraColours(vehicleWorkedOn)
+    changeColors(r,g,b,type,coat, pearlescentColor, rimsColor)
 end)
 
 local function clearCustomColor(type, onlyLocal)
@@ -157,7 +166,11 @@ local function clearCustomColor(type, onlyLocal)
         end
         ClearVehicleCustomPrimaryColour(vehicleWorkedOn)
         if not onlyLocal then
-            SetVehicleModColor_1(vehicleWorkedOn, 0, 0, 0)
+            if not ogPearl then 
+                ogPearl = 0
+            end
+            SetVehicleModColor_1(vehicleWorkedOn, 0, 0, ogPearl)
+            SetVehicleExtraColours(vehicleWorkedOn, ogPearl, ogRims)
         end
     elseif type == '2' then
         if Config.Debug then
@@ -232,11 +245,13 @@ RegisterNetEvent('cw-rgbpainter:client:ClearCustomColorFromMenu', function(data)
         end
     end
     if QBCore.Functions.HasItem(Config.Items.paintRemoval, canisterAmount) then
+        ogPearl, ogRims = GetVehicleExtraColours(GetPlayersLastVehicle())
+
         TriggerEvent('animations:client:EmoteCommandStart', {"mechanic3"})
         if Config.Settings.RemovalSprayCansAreUsedUp then
             TriggerServerEvent('cw-rgbpainter:server:TakeItems', Config.Items.paintRemoval, canisterAmount)
         end
-        QBCore.Functions.Progressbar("open_cw_laptop", "Removing custom paint", Config.Settings.RemoveTime, false, true, {
+        QBCore.Functions.Progressbar("removing_paint", "Removing custom paint", Config.Settings.RemoveTime, false, true, {
             disableMovement = true,
             disableCarMovement = true,
             disableMouse = false,
@@ -335,10 +350,13 @@ local function openMainMenu()
         else
             ogSecondaryIsRGB = false
         end
-        ogPrimCoat, ogPearl = GetVehicleModColor_1(vehicle)
-        ogSecCoat = GetVehicleModColor_1(vehicle)
+
+        ogPrimCoat = GetVehicleModColor_1(vehicle)
+        ogPearl, ogRims = GetVehicleExtraColours(vehicle)
+        ogSecCoat = GetVehicleModColor_2(vehicle)
+
         if Config.Debug then
-           print('Original coats: ', ogPrimCoat,ogSecCoat)
+           print('Original coats: ', ogPrimCoat,ogSecCoat, 'original pearl:', ogPearl)
         end
     end
 
@@ -452,32 +470,33 @@ end)
 RegisterNetEvent("cw-rgbpainter:client:handleTakeOutVehicle", function(veh, mods)
     local primary = mods.color1
     local secondary = mods.color2
-    local ped = PlayerPedId()
-	local vehicle = GetPlayersLastVehicle()
-    vehicleWorkedOn = vehicle
+    vehicleWorkedOn = veh
     Wait(100)
     if type(mods.color1) == 'table' then
-        if Config.Debug then
-           print('Primary coat', mods.color1Coat)
-        end
         local Pr, Pg, Pb = mods.color1[1], mods.color1[2], mods.color1[3]
-        changeColors(Pr, Pg, Pb, '1', mods.color1Coat)
+        if Config.Debug then
+            print('Takeout: Primary', Pr, Pg, Pb)
+            print('Takeout: Primary coat', mods.color1Coat)
+            print('Takeout: Primary pearl', mods.pearlescentColor)
+        end
+        changeColors(Pr, Pg, Pb, '1', mods.color1Coat, mods.pearlescentColor, mods.wheelColor)
     end
     Wait(100)
     if type(mods.color2) == 'table' then
         local Sr, Sg, Sb = mods.color2[1], mods.color2[2], mods.color2[3]
         if Config.Debug then
-           print('Secondary coat', mods.color2Coat)
+            print('Takeout: Secondary', Sr, Sg, Sb)
+            print('Takeout: Secondary coat', mods.color2Coat)
         end
-        changeColors(Sr, Sg, Sb, '2', mods.color2Coat)
+        changeColors(Sr, Sg, Sb, '2', mods.color2Coat, mods.pearlescentColor)
     end
     vehicleWorkedOn = nil
 end)
 
 local function resetColors()
     if Config.Debug then
-       print('ogPrim', dump(ogPrim), ogPrimCoat, ogPrimaryIsRGB)
-       print('ogSec', dump(ogSec), ogSecCoat, ogSecondaryIsRGB)
+       print('ogPrim', dump(ogPrim), 'ogPrim Coat', ogPrimCoat, 'og pearl', ogPearl, 'og rims', ogRims,'is RGB', ogPrimaryIsRGB)
+       print('ogSec', dump(ogSec), 'ogPrim Coat', ogSecCoat, 'is RGB', ogSecondaryIsRGB)
        print('Vehicle worked on:', vehicleWorkedOn)
     end
 
@@ -491,13 +510,13 @@ local function resetColors()
     SetVehicleColours(vehicleWorkedOn, tOgPrim  , tOgSec)
 
     if ogPrimaryIsRGB then
-        changeColors(ogPrim[1],ogPrim[2],ogPrim[3],'1', ogPrimCoat)
+        changeColors(ogPrim[1],ogPrim[2],ogPrim[3],'1', ogPrimCoat, ogPearl, ogRims)
     else
         clearCustomColor('1', true)
         if ogPrimCoat == 7 then
             ogPrimCoat = 0
         end
-        SetVehicleModColor_1(vehicleWorkedOn,ogPrimCoat, tonumber(ogPrim), 0)
+        SetVehicleModColor_1(vehicleWorkedOn,ogPrimCoat, tonumber(ogPrim), ogPearl)
     end
     if ogSecondaryIsRGB then
         changeColors(ogSec[1],ogSec[2],ogSec[3],'2', ogSecCoat)
@@ -505,6 +524,8 @@ local function resetColors()
         clearCustomColor('2', true)
         SetVehicleModColor_2(vehicleWorkedOn,ogSecCoat, ogSec)
     end
+    SetVehicleExtraColours(vehicleWorkedOn, ogPearl, ogRims)
+
     
 
     TriggerEvent("cw-rgbpainter:client:openInteraction", true) 

@@ -31,7 +31,7 @@ local Translations = {
         ["primaryInput"]                        = "Your Primary input wasn't correct",
         ["secondaryInput"]                        = "You Secondary input wasn't correct",
         ["amountCanisters"]                        = "You do not have enough paint canisters on you",
-        ["amountRemoval"]                        = "You Secondary input wasn't correct",
+        ["amountRemoval"]                        = "You dont have enought paint removal canisters on you",
         ["inputAmount"]                        = "You need to input at least one color",
         
     },

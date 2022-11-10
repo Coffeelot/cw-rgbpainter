@@ -9,6 +9,19 @@ Coming super soon: Job requirements.
 
 # Preview 📽
 COMING SOON 
+
+# Setup 👨‍💻
+Find `QBCore.Functions.GetVehicleProperties` in `qb-core/client/functions.lua` and find the huge `return` object with all the fields. Add these fields somewhere in there (maybe after `color2 = colorSecondary,` i dont know im not your mom).
+```
+            color1Coat = GetVehicleModColor_1(vehicle),
+            color2Coat = GetVehicleModColor_2(vehicle),
+```
+If you don't, opening the customs meny will remove the coats from this mod ‼
+Open up `qb-garages/client/main.lua` and find the net event `'qb-garages:client:takeOutGarage'`. Put this somewhere in there (maybe after the `"vehiclekeys:client:SetOwner"` event call or something):
+```
+                TriggerEvent("cw-rgbpainter:client:handleTakeOutVehicle", veh, properties)
+```
+
 # Developed by Coffeelot and Wuggie
 [More scripts by us](https://github.com/stars/Coffeelot/lists/cw-scripts)  👈\
 [Support, updates and script previews](https://discord.gg/FJY4mtjaKr) 👈
