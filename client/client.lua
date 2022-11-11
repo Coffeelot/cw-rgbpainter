@@ -340,6 +340,7 @@ local function openClearMenu()
 end
 
 RegisterNetEvent("cw-rgbpainter:client:openClearInteraction", function()
+    PlaySound(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", 0, 0, 1)
     local vehicle = GetPlayersLastVehicle()
     local vehicleCoords = GetEntityCoords(vehicle)
     local ped = PlayerPedId()
@@ -474,7 +475,6 @@ local function openMainMenu()
         end
 
         if primaryIsFilled or secondaryIsFilled then
-            PlaySound(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", 0, 0, 1)
             TriggerEvent("cw-rgbpainter:client:openConfirmInteraction", data[1], data[2],data[3],data[4])
         end
     else
@@ -489,6 +489,7 @@ local function openMainMenu()
 end
 
 RegisterNetEvent("cw-rgbpainter:client:openInteraction", function(canceled)
+    PlaySound(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", 0, 0, 1)
     local vehicle = GetPlayersLastVehicle()
     local vehicleCoords = GetEntityCoords(vehicle)
     local ped = PlayerPedId()
@@ -565,6 +566,7 @@ local function resetColors()
 end
 
 RegisterNetEvent("cw-rgbpainter:client:openConfirmInteraction", function(primary, coatPrimary, secondary, coatSecondary)
+    PlaySound(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", 0, 0, 1)
     local dialog = exports['qb-input']:ShowInput({
         header = Lang:t('paintMenu.confirmHeader'),
         submitText = Lang:t('paintMenu.confirm'),
