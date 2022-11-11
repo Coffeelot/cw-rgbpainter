@@ -1,5 +1,5 @@
 # RGB Painter Script 🖌
-A standalone RGB vehicle paint script. The script comes with two usable items: A paint gun and a paint removal spray can. And also a paint canister that's needed to operate the paint gun.
+A RGB vehicle paint script, standalone from any custom shops and scam price. The script comes with two usable items: A paint gun and a paint removal spray can. And also a paint canister that's needed to operate the paint gun.
 
 Using the paint gun opens a menu where you can input RGB values (format example: "250 0 250") to paint Primary and Secondary. Pressing "Preview" opens the confirmation. You can back out from here and the script will reset your cars original color. If you have canister usage enabled you need to have 1-2 canisters on you to complete the painting. When you confirm the ped will do a lil animation and then you got a new color coat! It syncs to the database and creates a separate field to track coat (gloss, matte etc).
 
@@ -25,6 +25,7 @@ Find `QBCore.Functions.GetVehicleProperties` in `qb-core/client/functions.lua` a
     color2Coat = GetVehicleModColor_2(vehicle),
 ```
 If you don't, opening the customs meny will remove the coats from this mod ‼
+
 Open up `qb-garages/client/main.lua` and find the net event `'qb-garages:client:takeOutGarage'`. Put this somewhere in there (maybe after the `"vehiclekeys:client:SetOwner"` event call or something):
 ```
     TriggerEvent("cw-rgbpainter:client:handleTakeOutVehicle", veh, properties)
