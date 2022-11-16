@@ -40,6 +40,7 @@ Items to add to qb-core>shared>items.lua if you want to used the included item
 ```
 ["paint_gun"] =          {["name"] = "paint_gun",         ["label"] = "Spray Paint Gun",                  ["weight"] = 1, ["type"] = "item", ["image"] = "paint_gun.png", ["unique"] = false, ["useable"]= true, ['shouldClose'] = false, ["combinable"] = nil, ["description"] = "Paint gun. Needs a canister to be used"},
 ["paint_canister"] =          {["name"] = "paint_canister",         ["label"] = "Paint Canister",                  ["weight"] = 1, ["type"] = "item", ["image"] = "paint_canister.png", ["unique"] =false, ["useable"] = true, ['shouldClose'] = false, ["combinable"] = nil, ["description"] = "Paint canister for paint guns"},
+["paint_removal_spray"] = {["name"] = "paint_removal_spray", ["label"] = "Paint Removal", ["weight"] = 1, ["type"] = "item", ["image"] = "paint_removal_spray.png", ["unique"] =false, ["useable"] = true, ['shouldClose'] = false, ["combinable"] = nil, ["description"] = "Paint Removal for Vehicles"},
 ```
 Also make sure the images are in qb-inventory>html>images
 
