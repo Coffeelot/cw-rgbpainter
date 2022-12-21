@@ -283,7 +283,7 @@ RegisterNetEvent('cw-rgbpainter:client:ClearCustomColorFromMenu', function(data)
         if Config.Settings.RemovalSprayCansAreUsedUp then
             TriggerServerEvent('cw-rgbpainter:server:TakeItems', Config.Items.paintRemoval, canisterAmount)
         end
-        QBCore.Functions.Progressbar("removing_paint", "Removing custom paint", Config.Settings.RemoveTime, false, true, {
+        QBCore.Functions.Progressbar("removing_paint", Lang:t('info.removing_paint'), Config.Settings.RemoveTime, false, true, {
             disableMovement = true,
             disableCarMovement = true,
             disableMouse = false,
@@ -609,7 +609,7 @@ RegisterNetEvent("cw-rgbpainter:client:openConfirmInteraction", function(primary
                 handleSprayCanSpray(secondary)
             end
             TriggerEvent('animations:client:EmoteCommandStart', {"mechanic3"})
-            QBCore.Functions.Progressbar("open_cw_laptop", "Applying Custom Paintjob", Config.Settings.PaintTime, false, true, {
+            QBCore.Functions.Progressbar("open_cw_laptop", Lang:t('info.applying_paint'), Config.Settings.PaintTime, false, true, {
                 disableMovement = true,
                 disableCarMovement = true,
                 disableMouse = false,

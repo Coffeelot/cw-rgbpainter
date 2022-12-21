@@ -38,7 +38,11 @@ local Translations = {
     },
     success = {
         ["paintRemoved"]                = "Custom paint removed. Make sure to park it in a garage before you modify it further"
-    }
+    },
+    info = {
+        ["applying_paint"] = "Applying Custom Paintjob",
+        ["removing_paint"] = "Removing custom paint"
+    } 
 }
 
 Lang = Locale:new({
