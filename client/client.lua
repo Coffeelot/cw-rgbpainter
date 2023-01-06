@@ -9,6 +9,8 @@ local ogPrimaryIsRGB, ogSecondaryIsRGB = false, false
 local vehicleWorkedOn = nil
 local attachedProp = 0
 
+local useDebug = Config.Debug
+
 -- DEBUG
 local function dump(o)
     if type(o) == 'table' then
@@ -25,11 +27,11 @@ end
 
 local function splitColors(input)
     local result = {};
-    for match in (input.." "):gmatch("(.-) ") do
-        table.insert(result, match);
+    for _, val in pairs(input) do
+        table.insert(result, val);
     end
     return result[1], result[2], result[3];
-end
+end 
 
 local function showNonLoopParticle(dict, particleName, scale, r,g,b, objectToAttachTo, offset)
     while not HasNamedPtfxAssetLoaded(dict) do
@@ -40,7 +42,7 @@ local function showNonLoopParticle(dict, particleName, scale, r,g,b, objectToAtt
     if r == nil or g == nil or g == nil then
         r, g, b = 0.0, 0.0, 0.0
     end
-    if Config.Debug then
+    if useDebug then
        print('Particles R G B', r,g,b)
     end
     SetParticleFxNonLoopedColour(r,g,b)
@@ -49,8 +51,11 @@ local function showNonLoopParticle(dict, particleName, scale, r,g,b, objectToAtt
     return particleHandle
 end
 
-local function handleSpray (color)
+local function handleSpray(color)
     local r,g,b
+    if useDebug then
+       print('handlespray', dump(color))
+    end
     if color then
         r,g,b = splitColors(color)
         r,g,b = r/250.0, g/250.0, b/250.0
@@ -68,7 +73,7 @@ local function handleSpray (color)
         vehicleWorkedOn = vehicle
     end
     local offset = math.random(-20,20)*0.1
-    if Config.Debug then
+    if useDebug then
        print('Spray offset', offset)
     end
 
@@ -77,6 +82,9 @@ end
 
 local function handleSprayCanSpray(color)
     local r,g,b
+    if useDebug then
+        print('can handlespray', dump(color))
+     end
     if color then
         r,g,b = splitColors(color)
         r,g,b = r/250.0, g/250.0, b/250.0
@@ -93,7 +101,7 @@ end
 
 local function changeColors(r, g, b, type, coat, pearl, rims)
     if type == '1' then
-        if Config.Debug then
+        if useDebug then
            print('updating primary', r, g, b)
         end
         if coat ~= nil then
@@ -109,7 +117,7 @@ local function changeColors(r, g, b, type, coat, pearl, rims)
         end
     end
     if type == '2' then
-        if Config.Debug then
+        if useDebug then
            print('updating secondary', r, g, b)
         end
         if coat ~= nil then
@@ -120,7 +128,7 @@ local function changeColors(r, g, b, type, coat, pearl, rims)
 end
 
 local function clearProp()
-    if Config.Debug then
+    if useDebug then
        print('REMOVING PROP', attachedProp)
     end
     if DoesEntityExist(attachedProp) then
@@ -161,7 +169,7 @@ local function clearCustomColor(type, onlyLocal)
     vehicleWorkedOn = vehicle
     Wait(100)
     if type == '1' then
-        if Config.Debug then
+        if useDebug then
            print('clearing primary')
         end
         ClearVehicleCustomPrimaryColour(vehicleWorkedOn)
@@ -173,7 +181,7 @@ local function clearCustomColor(type, onlyLocal)
             SetVehicleExtraColours(vehicleWorkedOn, ogPearl, ogRims)
         end
     elseif type == '2' then
-        if Config.Debug then
+        if useDebug then
            print('clearing secondary')
         end
         ClearVehicleCustomSecondaryColour(vehicleWorkedOn)
@@ -182,7 +190,7 @@ local function clearCustomColor(type, onlyLocal)
         end
     end
     if type == nil then
-        if Config.Debug then
+        if useDebug then
            print('clearing both')
         end
         clearCustomColor('1')
@@ -217,18 +225,18 @@ local function hasAuth()
         local Player = QBCore.Functions.GetPlayerData()
         local playerHasJob = Config.AllowedJobs[Player.job.name]
         local jobGradeReq = nil
-        if Config.Debug then
+        if useDebug then
            print('Player job: ', Player.job.name)
            print('Allowed jobs: ', dump(Config.AllowedJobs))
         end
         
         if playerHasJob then
-            if Config.Debug then
+            if useDebug then
                print('Player job level: ', Player.job.grade.level)
             end
             if Config.AllowedJobs[Player.job.name] ~= nil then
                 jobGradeReq = Config.AllowedJobs[Player.job.name].minimumRank
-                if Config.Debug then
+                if useDebug then
                    print('Required job grade: ', jobGradeReq)
                 end
             end      
@@ -247,7 +255,7 @@ end
 
 local function isWithinReach(playerCoords, vehicleCoords)
     local distance = GetDistanceBetweenCoords(playerCoords,vehicleCoords,true)
-    if Config.Debug then
+    if useDebug then
        print('Distance to vehicle', distance)
     end
     if Config.Settings.MaximumDistance > distance then
@@ -267,7 +275,7 @@ RegisterNetEvent('cw-rgbpainter:client:ClearCustomColorFromMenu', function(data)
     handleSprayCanSpray()
     local canisterAmount = 0
     if Config.Settings.RemovalSprayCansAreUsedUp then
-        if Config.Debug then
+        if useDebug then
            print('Removal sprays usage is enabled', data[1])
         end
         if data[1] == '1' or data[1] == '2' then
@@ -303,15 +311,6 @@ RegisterNetEvent('cw-rgbpainter:client:ClearCustomColorFromMenu', function(data)
         QBCore.Functions.Notify(Lang:t('error.amountRemoval'), "error")
     end
 end)
-
-
-local function splitColors(input)
-    local result = {};
-    for match in (input.." "):gmatch("(.-) ") do
-        table.insert(result, match);
-    end
-    return result[1], result[2], result[3];
-end 
 
 local function openClearMenu()
     exports['qb-menu']:openMenu({{
@@ -365,141 +364,6 @@ local function validateColors(r,g,b)
     return result
 end
 
-local function openMainMenu()
-    TriggerEvent('animations:client:EmoteCommandStart', {"tablet2"})
-    local vehicle = GetPlayersLastVehicle()
-    vehicleWorkedOn = vehicle
-    if ogPrim == nil or ogSec == nil then
-        local vehicleProps = QBCore.Functions.GetVehicleProperties(vehicle)
-        ogPrim = vehicleProps.color1
-        ogSec = vehicleProps.color2
-        if type(ogPrim) == 'table' then
-            ogPrimaryIsRGB = true
-        else
-            ogPrimaryIsRGB = false
-        end
-        if type(ogSec) == 'table' then
-            ogSecondaryIsRGB = true
-        else
-            ogSecondaryIsRGB = false
-        end
-
-        ogPrimCoat = GetVehicleModColor_1(vehicle)
-        ogPearl, ogRims = GetVehicleExtraColours(vehicle)
-        ogSecCoat = GetVehicleModColor_2(vehicle)
-
-        if Config.Debug then
-           print('Original coats: ', ogPrimCoat,ogSecCoat, 'original pearl:', ogPearl)
-        end
-    end
-
-    local dialog = exports['qb-input']:ShowInput({
-        header = Lang:t('paintMenu.header'),
-        submitText = Lang:t('paintMenu.preview'),
-        inputs = {
-            {
-                text = Lang:t('paintMenu.primaryDefault'), -- text you want to be displayed as a place holder
-                name = "primary", -- name of the input should be unique otherwise it might override
-                type = "text", -- type of the input - number will not allow non-number characters in the field so only accepts 0-9
-            },
-            {
-                text = Lang:t('paintMenu.colorType'), -- text you want to be displayed as a input header
-                name = "primaryType", -- name of the input should be unique otherwise it might override
-                type = "radio", -- type of the input - Radio is useful for "or" options e.g; billtype = Cash OR Bill OR bank
-                options = { -- The options (in this case for a radio) you want displayed, more than 6 is not recommended
-                    { value = 1, text = "Gloss" }, -- Options MUST include a value and a text option
-                    { value = 3, text = "Matte" }, -- Options MUST include a value and a text option
-                    { value = 4, text = "Metal" }, -- Options MUST include a value and a text option
-                    { value = 5, text = "Chrome" }, -- Options MUST include a value and a text option
-                },
-                default = 1, -- Default radio option, must match a value from above, this is optional
-            },
-            {
-                text = Lang:t('paintMenu.secondaryDefault'), -- text you want to be displayed as a place holder
-                name = "secondary", -- name of the input should be unique otherwise it might override
-                type = "text", -- type of the input
-            },
-            {
-                text = Lang:t('paintMenu.colorType'), -- text you want to be displayed as a input header
-                name = "secondaryType", -- name of the input should be unique otherwise it might override
-                type = "radio", -- type of the input - Radio is useful for "or" options e.g; billtype = Cash OR Bill OR bank
-                options = { -- The options (in this case for a radio) you want displayed, more than 6 is not recommended
-                    { value = 1, text = Lang:t('coatTypes.gloss') }, -- Options MUST include a value and a text option
-                    { value = 3, text = Lang:t('coatTypes.matte') }, -- Options MUST include a value and a text option
-                    { value = 4, text = Lang:t('coatTypes.metal') }, -- Options MUST include a value and a text option
-                    { value = 5, text = Lang:t('coatTypes.chrome') }, -- Options MUST include a value and a text option
-                },
-                default = 1, -- Default radio option, must match a value from above, this is optional
-            },
-        },
-    })
-    
-    if dialog ~= nil then
-        local data = { dialog["primary"], dialog["primaryType"], dialog["secondary"], dialog["secondaryType"] }
-
-        local Pr, Pg, Pb = splitColors(data[1])
-        local primaryValidation = validateColors(Pr,Pb,Pg);
-        local primaryIsFilled = primaryValidation == 3
-
-        local Sr, Sg, Sb = splitColors(data[3])
-        local secondaryValidation = validateColors(Sr,Sb,Sg);
-        local secondaryIsFilled = secondaryValidation == 3
-        if Config.Debug then
-           print('Validated Primary', validateColors(Pr,Pb,Pg), 'Validated Secondary', validateColors(Sr,Sb,Sg))
-        end
-
-        if not primaryIsFilled and not secondaryIsFilled then
-            QBCore.Functions.Notify(Lang:t('error.inputAmount'), "error")
-            openMainMenu()
-        end
-        
-        if primaryIsFilled then
-            if Config.Debug then
-               print('Painting Primary')
-            end
-            TriggerEvent('cw-rgbpainter:client:ChangeColor', Pr, Pg, Pb, "1", data[2])
-        end
-        
-        if secondaryIsFilled then
-            if Config.Debug then
-                print('Painting Secondary')
-             end
-            TriggerEvent('cw-rgbpainter:client:ChangeColor', Sr, Sg, Sb, "2", data[4])
-        end
-
-        if primaryValidation > 1 and not primaryIsFilled then
-            QBCore.Functions.Notify(Lang:t('error.primaryInput'), "error")
-        end
-        if secondaryValidation > 1 and not secondaryIsFilled then
-            QBCore.Functions.Notify(Lang:t('error.secondaryInput'), "error")
-        end
-
-        if primaryIsFilled or secondaryIsFilled then
-            TriggerEvent("cw-rgbpainter:client:openConfirmInteraction", data[1], data[2],data[3],data[4])
-        end
-    else
-        QBCore.Functions.Notify(Lang:t('error.canceled'), "error")
-        TriggerEvent('animations:client:EmoteCommandStart', {"c"})
-        clearProp()
-
-        vehicleWorkedOn = nil
-        ogPrim = nil
-        ogSec = nil
-    end
-end
-
-RegisterNetEvent("cw-rgbpainter:client:openInteraction", function(canceled)
-    PlaySound(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", 0, 0, 1)
-    local vehicle = GetPlayersLastVehicle()
-    local vehicleCoords = GetEntityCoords(vehicle)
-    local ped = PlayerPedId()
-    local playerCoords = GetEntityCoords(ped)
-
-    if isInAPaintBooth(playerCoords) and isWithinReach(playerCoords, vehicleCoords) and hasAuth() then
-        openMainMenu()
-    end
-end)
-
 RegisterNetEvent("cw-rgbpainter:client:handleTakeOutVehicle", function(veh, mods)
     local primary = mods.color1
     local secondary = mods.color2
@@ -507,7 +371,7 @@ RegisterNetEvent("cw-rgbpainter:client:handleTakeOutVehicle", function(veh, mods
     Wait(100)
     if type(mods.color1) == 'table' then
         local Pr, Pg, Pb = mods.color1[1], mods.color1[2], mods.color1[3]
-        if Config.Debug then
+        if useDebug then
             print('Takeout: Primary', Pr, Pg, Pb)
             print('Takeout: Primary coat', mods.color1Coat)
             print('Takeout: Primary pearl', mods.pearlescentColor)
@@ -517,7 +381,7 @@ RegisterNetEvent("cw-rgbpainter:client:handleTakeOutVehicle", function(veh, mods
     Wait(100)
     if type(mods.color2) == 'table' then
         local Sr, Sg, Sb = mods.color2[1], mods.color2[2], mods.color2[3]
-        if Config.Debug then
+        if useDebug then
             print('Takeout: Secondary', Sr, Sg, Sb)
             print('Takeout: Secondary coat', mods.color2Coat)
         end
@@ -526,8 +390,19 @@ RegisterNetEvent("cw-rgbpainter:client:handleTakeOutVehicle", function(veh, mods
     vehicleWorkedOn = nil
 end)
 
+local function resetCarWorkedOn()
+    ogPrim = nil
+    ogSec = nil
+    ogPrimCoat = nil
+    ogSecCoat = nil
+    ogPearl = nil
+    ogRims = nil
+    ogPrimaryIsRGB, ogSecondaryIsRGB = false, false
+    vehicleWorkedOn = nil
+end
+
 local function resetColors()
-    if Config.Debug then
+    if useDebug then
        print('ogPrim', dump(ogPrim), 'ogPrim Coat', ogPrimCoat, 'og pearl', ogPearl, 'og rims', ogRims,'is RGB', ogPrimaryIsRGB)
        print('ogSec', dump(ogSec), 'ogPrim Coat', ogSecCoat, 'is RGB', ogSecondaryIsRGB)
        print('Vehicle worked on:', vehicleWorkedOn)
@@ -558,104 +433,205 @@ local function resetColors()
         SetVehicleModColor_2(vehicleWorkedOn,ogSecCoat, ogSec)
     end
     SetVehicleExtraColours(vehicleWorkedOn, ogPearl, ogRims)
-
-    
-
-    TriggerEvent("cw-rgbpainter:client:openInteraction", true) 
+    resetCarWorkedOn()
+    --TriggerEvent("cw-rgbpainter:client:openInteraction", true) 
     QBCore.Functions.Notify(Lang:t('error.canceled'), "error")
 end
 
-RegisterNetEvent("cw-rgbpainter:client:openConfirmInteraction", function(primary, coatPrimary, secondary, coatSecondary)
-    PlaySound(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", 0, 0, 1)
-    local dialog = exports['qb-input']:ShowInput({
-        header = Lang:t('paintMenu.confirmHeader'),
-        submitText = Lang:t('paintMenu.confirm'),
-        inputs = {},
-    })
-
+local function handleConfirm(primary, coatPrimary, secondary, coatSecondary)
     local ped = PlayerPedId()
 	local vehicle = GetPlayersLastVehicle()
     local plate = QBCore.Functions.GetPlate(vehicle)
+    local canisterAmount = 0
+    if Config.Settings.CanistersAreUsedUp then
+        if useDebug then
+           print('Canister usage is enabled')
+        end
+        if #primary > 1 then
+            canisterAmount = canisterAmount+1
+        end
+        if #secondary > 1 then
+            canisterAmount = canisterAmount+1
+        end
+    end
+    if useDebug then
+       print('Canisters needed:', canisterAmount)
+    end
 
-    if dialog ~= nil then
-
-        local canisterAmount = 0
+    if QBCore.Functions.HasItem(Config.Items.canister, canisterAmount) then
+        TriggerEvent('animations:client:EmoteCommandStart', {"c"})
         if Config.Settings.CanistersAreUsedUp then
-            if Config.Debug then
-               print('Canister usage is enabled')
-            end
-            if #primary > 1 then
-                canisterAmount = canisterAmount+1
-            end
-            if #secondary > 1 then
-                canisterAmount = canisterAmount+1
-            end
-        end
-        if Config.Debug then
-           print('Canisters needed:', canisterAmount)
+            TriggerServerEvent('cw-rgbpainter:server:TakeItems', Config.Items.canister, canisterAmount)
         end
 
-        if QBCore.Functions.HasItem(Config.Items.canister, canisterAmount) then
-            TriggerEvent('animations:client:EmoteCommandStart', {"c"})
-            if Config.Settings.CanistersAreUsedUp then
-                TriggerServerEvent('cw-rgbpainter:server:TakeItems', Config.Items.canister, canisterAmount)
-            end
-
-            attachSprayCan()
+        attachSprayCan()
+        if useDebug then
+            print('colors to spray', dump(primary), dump(secondary))
+         end
+        if #primary > 0 then
+            handleSprayCanSpray(primary)
+        end
+        if #secondary > 0 then
+            handleSprayCanSpray(secondary)
+        end
+        TriggerEvent('animations:client:EmoteCommandStart', {"mechanic3"})
+        QBCore.Functions.Progressbar("open_cw_laptop", Lang:t('info.applying_paint'), Config.Settings.PaintTime, false, true, {
+            disableMovement = true,
+            disableCarMovement = true,
+            disableMouse = false,
+            disableCombat = true,
+        }, {}, {}, {}, function()
             if #primary > 0 then
-                handleSprayCanSpray(primary)
+                handleSpray(primary)
             end
             if #secondary > 0 then
-                handleSprayCanSpray(secondary)
+                handleSpray(secondary)
             end
-            TriggerEvent('animations:client:EmoteCommandStart', {"mechanic3"})
-            QBCore.Functions.Progressbar("open_cw_laptop", Lang:t('info.applying_paint'), Config.Settings.PaintTime, false, true, {
-                disableMovement = true,
-                disableCarMovement = true,
-                disableMouse = false,
-                disableCombat = true,
-            }, {}, {}, {}, function()
-                if primary ~= '' then
-                    local r, g, b = splitColors(primary)
-                    if Config.Debug then
-                       print ('Primary to apply', r,g,b, coatPrimary)
-                    end
-                    TriggerEvent('cw-rgbpainter:client:ChangeColor', r, g, b, "1", coatPrimary, true)
-                    ogPrim = nil
-                end
-                if secondary ~= '' then
-                    local r, g, b = splitColors(secondary)
-                    if Config.Debug then
-                       print ('Secondary to apply', r,g,b, coatSecondary)
-                    end
-                    TriggerEvent('cw-rgbpainter:client:ChangeColor', r, g, b, "2", coatSecondary, true)
-                    ogSec = nil
-                end
-                if #primary > 0 then
-                    handleSpray(primary)
-                end
-                if #secondary > 0 then
-                    handleSpray(secondary)
-                end
-                TriggerEvent('animations:client:EmoteCommandStart', {"c"})
-                clearProp()
-                TriggerServerEvent('cw-rgbpainter:server:ChangeColor', primary, secondary, plate, coatPrimary, coatSecondary)
-            end, function() -- Cancel
-                TriggerEvent('animations:client:EmoteCommandStart', {"c"})
-                clearProp()
-                QBCore.Functions.Notify(Lang:t('error.canceled'), "error")
-                resetColors()
-            end)
-        else
-            QBCore.Functions.Notify(Lang:t('error.amountCanisters'), "error")
-            TriggerEvent("cw-rgbpainter:client:openInteraction", true)
+            TriggerEvent('animations:client:EmoteCommandStart', {"c"})
+            clearProp()
+            TriggerServerEvent('cw-rgbpainter:server:ChangeColor', primary, secondary, plate, coatPrimary, coatSecondary)
+            resetCarWorkedOn()
+        end, function() -- Cancel
+            TriggerEvent('animations:client:EmoteCommandStart', {"c"})
+            clearProp()
+            QBCore.Functions.Notify(Lang:t('error.canceled'), "error")
             resetColors()
+        end)
+    else
+        QBCore.Functions.Notify(Lang:t('error.amountCanisters'), "error")
+        TriggerEvent("cw-rgbpainter:client:openInteraction", true)
+        resetColors()
+    end
+end
+
+
+local function setPaintingOpen(bool, i)
+    PlaySound(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", 0, 0, 1)
+    local citizenId = QBCore.Functions.GetPlayerData().citizenid
+    if useDebug then
+        print('hhiehiehei', i)
+    end
+    if useDebug then
+        print('Crafting was opened')
+    end
+    SetNuiFocus(bool, bool)
+    if bool then
+        local vehicle = GetPlayersLastVehicle()
+        vehicleWorkedOn = vehicle
+        if ogPrim == nil or ogSec == nil then
+            local vehicleProps = QBCore.Functions.GetVehicleProperties(vehicle)
+            ogPrim = vehicleProps.color1
+            ogSec = vehicleProps.color2
+            if type(ogPrim) == 'table' then
+                ogPrimaryIsRGB = true
+            else
+                ogPrimaryIsRGB = false
+            end
+            if type(ogSec) == 'table' then
+                ogSecondaryIsRGB = true
+            else
+                ogSecondaryIsRGB = false
+            end
+    
+            ogPrimCoat = GetVehicleModColor_1(vehicle)
+            ogPearl, ogRims = GetVehicleExtraColours(vehicle)
+            ogSecCoat = GetVehicleModColor_2(vehicle)
+    
+            if useDebug then
+               print('Original coats: ', ogPrimCoat,ogSecCoat, 'original pearl:', ogPearl)
+            end
         end
     else
-        resetColors()
+        TriggerEvent('animations:client:EmoteCommandStart', {"c"})
+    end
+    SendNUIMessage({
+        action = "cwRGB",
+        toggle = bool
+    })
+end
+
+RegisterNetEvent("cw-rgbpainter:client:openMenu", function()
+    setPaintingOpen(true)
+end)
+
+RegisterNUICallback('handleColor', function(values, cb)
+    local r = values.r
+    local g = values.g
+    local b = values.b
+    local coat = values.coat
+    local type = values.type
+    if useDebug then
+       print('painting in', r,g,b, coat, type)
+    end
+    TriggerEvent('cw-rgbpainter:client:ChangeColor', r, g, b, coat, type)
+    cb(true)
+end)
+
+
+RegisterNUICallback('attemptPaint', function(values, cb)
+    setPaintingOpen(false)
+    local primary = { values.primary["rP"], values.primary["gP"], values.primary["bP"] }
+    local secondary = { values.secondary["rS"], values.secondary["gS"], values.secondary["bS"] }
+    local coatPrimary = values.coatPrimary
+    local coatSecondary = values.coatSecondary
+    if useDebug then
+       print('confirm', dump(primary), dump(secondary))
+    end
+    handleConfirm(primary, coatPrimary, secondary, coatSecondary)
+    cb(true)
+end)
+
+RegisterNUICallback('getOGcolors', function(_, cb)
+    if not ogPrimaryIsRGB and not ogSecondaryIsRGB then
+        if useDebug then
+           print('original were not rgb')
+        end
+        cb(false)
+    else
+        cb({prim=ogPrim, sec=ogSec, primType = ogPrimCoat, secType = ogSecCoat})   
     end
 end)
 
+
+RegisterNUICallback('closePaint', function()
+    setPaintingOpen(false)
+    resetColors()
+end)
+
+
+RegisterCommand('openPaint', function(source)
+    if useDebug then
+        print('Open ppaint')
+    end
+    setPaintingOpen(true)
+end)
+
+-- RegisterNUICallback('getRecipes', function(data, cb)
+--     if useDebug then
+--        print('Fetching recipes')
+--     end
+--     getRecipes()
+--     cb(Recipes)
+-- end)
+
+-- RegisterNUICallback('closeCrafting', function(_, cb)
+--     if useDebug then
+--         print('Closing crafting')
+--     end
+--     setCraftingOpen(false)
+--     cb('ok')
+-- end)
+
+RegisterNUICallback('getInventory', function(_, cb)
+    cb(Config.Inventory)
+end)
+
+
 RegisterCommand('removeCan', function ()
     clearProp()
+end)
+
+RegisterNetEvent('cw-rgbpainter:client:toggleDebug', function(debug)
+   print('Setting debug to',debug)
+   useDebug = debug
 end)

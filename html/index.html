@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js" integrity="sha256-hlKLmzaRlE8SCJC1Kw8zoUbU8BxA+8kR3gseuKfMjxA=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/emojionearea/3.4.2/emojionearea.min.js" integrity="sha512-hkvXFLlESjeYENO4CNi69z3A1puvONQV5Uh+G4TUDayZxSLyic5Kba9hhuiNLbHqdnKNMk2PxXKm0v7KDnWkYA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="./style.css">
+    <script src="./script.js"></script>
+    <title>CW RGB PAINTER</title>
+</head>
+    <body>
+        <div class="outer-container">
+            <div class="painter-container">
+                <div class="app-container">
+                    <div class="right-column">
+                        <div class="recipe-confirmation-container">
+                            <div class="content">
+                                <div class="row">
+                                    <h1 id="title">RGB PAINTER</h1>
+                                </div>
+                                <div class="confirmation-subtitle row"></div>
+                                <h2 id="title">Primary</h2>
+                                <div class="row">
+                                    <input type="color" id="colorPickerPrim" value="#ffffff" oninput="handleChange(this.value,1);" />
+                                </div>
+                                <div class="row radios">
+                                    <input type="radio" selected id="primChoice1" name="prim" value="1" onclick="handleChangeCoatType(1, 1)"/>
+                                    <label for="primChoice1">Basic</label>
+                                    <input type="radio" id="primChoice2" name="prim" value="3"  onclick="handleChangeCoatType(3, 1)" />
+                                    <label for="primChoice2">Matte</label>
+                                    <input type="radio" id="primChoice3" name="prim" value="4" onclick="handleChangeCoatType(4, 1)">
+                                    <label for="primChoice3">Metal</label>
+                                    <input type="radio" id="primChoice4" name="prim" value="5" onclick="handleChangeCoatType(5, 1)">
+                                    <label for="primChoice4">Chrome</label>
+                                </div>
+                                <h2 id="title">Secondary</h2>
+                                <div class="row">
+                                    <input type="color" id="colorPickerSec" value="#ffffff" oninput="handleChange(this.value,2);" />
+                                </div>
+                                <div class="row radios">
+                                    <input type="radio" selected id="secChoice1" name="sec" value="1" onclick="handleChangeCoatType(1, 2)"/>
+                                    <label for="secChoice1">Basic</label>
+                                    <input type="radio" id="secChoice2" name="sec" value="3"  onclick="handleChangeCoatType(3, 2)" />
+                                    <label for="secChoice2">Matte</label>
+                                    <input type="radio" id="secChoice3" name="sec" value="4" onclick="handleChangeCoatType(4, 2)">
+                                    <label for="secChoice3">Metal</label>
+                                    <input type="radio" id="secChoice4" name="sec" value="5" onclick="handleChangeCoatType(5, 2)">
+                                    <label for="secChoice4">Chrome</label>
+                                </div>
+                            </div>
+                            <div class="buttons">
+                                <div class="confirm-button" onClick="handleConfirm()">Confirm Paint</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

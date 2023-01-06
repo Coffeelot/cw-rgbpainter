@@ -1,4 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
+local useDebug = Config.Debug
 
 local function dump(o)
     if type(o) == 'table' then
@@ -15,7 +16,7 @@ end
 
 local function ClearColors(type, plate)
     local result = MySQL.query.await('SELECT mods FROM player_vehicles WHERE plate = ?', {plate})
-    if Config.Debug then
+    if useDebug then
        print('removing colors in db for',  type, plate)
     end
     if result[1] then
@@ -30,7 +31,7 @@ local function ClearColors(type, plate)
         end
         MySQL.query('UPDATE player_vehicles SET mods = ? WHERE plate = ?', {json.encode(mods), plate})
     else
-        if Config.Debug then
+        if useDebug then
             print('Could not find mods for this vehicle in database')
         end
     end
@@ -38,8 +39,11 @@ end
 
 local function splitColors(input)
     local result = {};
-    for match in (input.." "):gmatch("(.-) ") do
-        table.insert(result, match);
+    for _, val in pairs(input) do
+        table.insert(result, val);
+    end
+    if useDebug then
+       print(dump(result))
     end
     return result[1], result[2], result[3];
 end 
@@ -50,21 +54,21 @@ RegisterNetEvent('cw-rgbpainter:server:ChangeColor', function(Primary, Secondary
     local result = MySQL.query.await('SELECT mods FROM player_vehicles WHERE plate = ?', {plate})
     local Pr, Pg, Pb = splitColors(Primary)
     local Sr, Sg, Sb = splitColors(Secondary)
-    if Config.Debug then
+    if useDebug then
        print('Primary color', Pr, Pg, Pb, Pcoat)
        print('Secondary color', Sr, Sg, Sb, Scoat)
     end
     if result[1] then
         local mods = json.decode(result[1].mods)
         if Pg then
-            if Config.Debug then
+            if useDebug then
                print('Painting primary')
             end
             mods.color1Coat = Pcoat
             mods.color1 = {Pr,Pg,Pb}
         end
         if Sg then
-            if Config.Debug then
+            if useDebug then
                print('Painting Secondary')
             end
             mods.color2Coat = Scoat
@@ -77,7 +81,7 @@ RegisterNetEvent('cw-rgbpainter:server:ChangeColor', function(Primary, Secondary
 end)
 
 RegisterNetEvent('cw-rgbpainter:server:TakeItems', function(item, amount)
-    if Config.Debug then
+    if useDebug then
        print('Removing', item, amount)
     end
     local src = source
@@ -93,7 +97,7 @@ end)
 
 
 QBCore.Functions.CreateUseableItem(Config.Items.paintGun, function(source, Item)
-    TriggerClientEvent("cw-rgbpainter:client:openInteraction", source)
+    TriggerClientEvent("cw-rgbpainter:client:openMenu", source)
 end)
 
 QBCore.Functions.CreateUseableItem(Config.Items.paintRemoval, function(source, Item)
@@ -116,4 +120,10 @@ QBCore.Commands.Add('clearcustomcolor', 'Clear custom color on vehicle (Admin On
         type = tostring(args[1])
     end
     TriggerClientEvent('cw-rgbpainter:client:ClearCustomColor', source, type)  
+end, 'admin')
+
+QBCore.Commands.Add('cwdebugrgb', 'toggle debug for rgb', {}, true, function(source, args)
+    useDebug = not useDebug
+    print('debug is now:', useDebug)
+    TriggerClientEvent('cw-rgbpainter:client:toggleDebug',source, useDebug)
 end, 'admin')
